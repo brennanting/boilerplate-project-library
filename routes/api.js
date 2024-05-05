@@ -34,12 +34,15 @@ module.exports = function (app) {
         .select({ _id: 1, title: 1, commentcount: 1 })
         .exec((err, booksFound) => {
           if (err) return console.log(err);
-          res.json(booksFound);
+          return res.json(booksFound);
         });
     })
 
     .post(function (req, res) {
       let title = req.body.title;
+      if (!title) {
+        return res.send("missing required field title")
+      }
       //response will contain new book object including atleast _id and title
       let newBook = new Book({
         title: title,
@@ -48,7 +51,7 @@ module.exports = function (app) {
       });
       newBook.save((err, createdBook) => {
         if (err) return console.log(err);
-        res.json({ _id: createdBook._id, title: createdBook.title });
+        return res.json({ _id: createdBook._id, title: createdBook.title });
       });
     })
 
@@ -68,9 +71,9 @@ module.exports = function (app) {
       Book.findById(req.params.id, '_id title comments', (err, bookFound) => {
         if (err) return console.log(err);
         if (!bookFound) {
-          res.send('no book exists')
+          return res.send('no book exists')
         }
-        res.send(bookFound);
+        return res.send(bookFound);
       })
     })
 
@@ -79,7 +82,7 @@ module.exports = function (app) {
       let comment = req.body.comment;
       //json res format same as .get
       if (!req.body.comment) {
-        res.send("Missing required field comment");
+        return res.send("missing required field comment");
       }
       Book.findByIdAndUpdate(
         req.params.id,
@@ -88,9 +91,9 @@ module.exports = function (app) {
         (err, bookFound) => {
           if (err) return console.log(err);
           if (!bookFound) {
-            res.send("no book exists");
+            return res.send("no book exists");
           }
-          res.send({
+          return res.send({
             _id: bookFound._id,
             title: bookFound.title,
             comments: bookFound.comments
@@ -105,9 +108,9 @@ module.exports = function (app) {
       Book.findByIdAndDelete(bookid, (err, bookDeleted) => {
         if (err) return console.log(err);
         if (!bookDeleted) {
-          res.send("No book exists");
+          return res.send("no book exists");
         }
-        res.send("delete successful")
+        return res.send("delete successful")
       })
     });
 
@@ -128,7 +131,7 @@ module.exports = function (app) {
       .get((req, res) => {
         Book.create(slowHorses, {ordered: true}, (err, booksCreated) => {
           if (err) return console.log(err);
-          res.json(booksCreated)
+          return res.json(booksCreated)
         })
       })
 };
